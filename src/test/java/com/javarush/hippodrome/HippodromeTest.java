@@ -1,11 +1,7 @@
 package com.javarush.hippodrome;
 
-import org.apache.logging.log4j.core.util.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -15,22 +11,26 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class HippodromeTest {
 
-    @Test
-    void should_exception_when_first_param_constructor_null() {
-        Exception exceptionNull = assertThrows(IllegalArgumentException.class, () -> new Hippodrome(null));
-        assertEquals("Horses cannot be null.", exceptionNull.getMessage());
+    public static final String HORSES_LIST_CANNOT_BE_NULL = "Horses cannot be null.";
+    public static final String HORSES_LIST_CANNOT_BE_EMPTY = "Horses cannot be empty.";
 
-        List<Horse> horseList = new ArrayList<>();
-        Exception exceptionEmpty = assertThrows(IllegalArgumentException.class, () -> new Hippodrome(horseList));
-        assertEquals("Horses cannot be empty.", exceptionEmpty.getMessage());
+    @Test
+    void should_exception_when_list_of_horses_is_null() {
+        Exception exceptionNull = assertThrows(IllegalArgumentException.class, () -> new Hippodrome(null));
+        assertEquals(HORSES_LIST_CANNOT_BE_NULL, exceptionNull.getMessage());
+
+        Exception exceptionEmpty = assertThrows(IllegalArgumentException.class, () -> new Hippodrome(new ArrayList<>()));
+        assertEquals(HORSES_LIST_CANNOT_BE_EMPTY, exceptionEmpty.getMessage());
     }
 
     @Test
-    void should_return_the_same_list() {
+    void should_return_initial_list_of_horses() {
         List<Horse> horseList = new ArrayList<>();
         IntStream.range(0, 30).forEach(value -> horseList.add(new Horse(String.valueOf(value), value)));
 
@@ -41,13 +41,12 @@ class HippodromeTest {
     @Test
     void should_run_move_for_every_horse() {
         List<Horse> horseList = new ArrayList<>();
-        IntStream.range(0, 50).forEach(value -> horseList.add(Mockito.spy(new Horse(String.valueOf(value), value))));
+        IntStream.range(0, 50).forEach(value -> horseList.add(mock(Horse.class)));
 
-        Hippodrome hippodrome = new Hippodrome(horseList);
-        hippodrome.move();
+        new Hippodrome(horseList).move();
 
         for (Horse horse : horseList) {
-            Mockito.verify(horse, Mockito.atLeastOnce()).move();
+            verify(horse).move();
         }
     }
 
